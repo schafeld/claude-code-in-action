@@ -9,6 +9,7 @@ import { useChat } from "@/lib/contexts/chat-context";
 export function ChatInterface() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { messages, input, handleInputChange, handleSubmit, status } = useChat();
+  const isEmptyState = messages.length === 0;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -23,12 +24,20 @@ export function ChatInterface() {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-full p-4 overflow-hidden">
-      <ScrollArea ref={scrollAreaRef} className="flex-1 overflow-hidden">
-        <div className="pr-4">
-          <MessageList messages={messages} isLoading={status === "streaming"} />
-        </div>
-      </ScrollArea>
+    <div className="flex h-full min-h-0 flex-col p-4 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-hidden">
+        {isEmptyState ? (
+          <div className="flex h-full justify-center">
+            <MessageList messages={messages} isLoading={status === "streaming"} />
+          </div>
+        ) : (
+          <ScrollArea ref={scrollAreaRef} className="h-full overflow-hidden">
+            <div className="pr-4 h-full">
+              <MessageList messages={messages} isLoading={status === "streaming"} />
+            </div>
+          </ScrollArea>
+        )}
+      </div>
       <div className="mt-4 flex-shrink-0">
         <MessageInput
           input={input}
