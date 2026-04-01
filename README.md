@@ -1,4 +1,9 @@
-# UIGen
+# Claude Code in Action
+
+[Coursera, Claude Code in Action](https://www.coursera.org/learn/claude-code-in-action/)
+
+
+## UIGen
 
 AI-powered React component generator with live preview.
 
