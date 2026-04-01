@@ -5,6 +5,31 @@ import { cn } from "@/lib/utils";
 import { User, Bot, Loader2 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
+function getToolLabel(toolName: string, args: Record<string, unknown>, isDone: boolean): string {
+  if (toolName === "str_replace_editor") {
+    const command = args?.command as string;
+    const labels: Record<string, [string, string]> = {
+      create: ["Creating file…", "Created file"],
+      str_replace: ["Editing file…", "Updated file"],
+      insert: ["Editing file…", "Updated file"],
+      view: ["Reading file…", "Read file"],
+      undo_edit: ["Undoing edit…", "Undid edit"],
+    };
+    const [pending, done] = labels[command] ?? ["Working…", "Done"];
+    return isDone ? done : pending;
+  }
+  if (toolName === "file_manager") {
+    const command = args?.command as string;
+    const labels: Record<string, [string, string]> = {
+      rename: ["Renaming file…", "Renamed file"],
+      delete: ["Deleting file…", "Deleted file"],
+    };
+    const [pending, done] = labels[command] ?? ["Working…", "Done"];
+    return isDone ? done : pending;
+  }
+  return isDone ? "Done" : "Working…";
+}
+
 interface MessageListProps {
   messages: Message[];
   isLoading?: boolean;
@@ -76,17 +101,19 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                             );
                           case "tool-invocation":
                             const tool = part.toolInvocation;
+                            const isDone = tool.state === "result" && !!tool.result;
+                            const label = getToolLabel(tool.toolName, tool.args as Record<string, unknown>, isDone);
                             return (
-                              <div key={partIndex} className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-mono border border-neutral-200">
-                                {tool.state === "result" && tool.result ? (
+                              <div key={partIndex} className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs border border-neutral-200">
+                                {isDone ? (
                                   <>
                                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                    <span className="text-neutral-700">{tool.toolName}</span>
+                                    <span className="text-neutral-600">{label}</span>
                                   </>
                                 ) : (
                                   <>
                                     <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
-                                    <span className="text-neutral-700">{tool.toolName}</span>
+                                    <span className="text-neutral-600">{label}</span>
                                   </>
                                 )}
                               </div>
